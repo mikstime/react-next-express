@@ -4,7 +4,14 @@ import {
     setQuantityAction, setPriceAction, setTotalAction
 } from '../redux/actions/marketActions'
 import {MarketStateType} from '../redux/reducers/marketReducer'
+import styled, {createGlobalStyle} from 'styled-components'
 
+const GlobalStyle = createGlobalStyle`
+  body {
+    margin: 0;
+    font-family: sans-serif;
+  }
+`
 type AppProps = Omit<MarketStateType, 'order'>
 
 const useForms = (): AppProps => {
@@ -20,6 +27,90 @@ const useForms = (): AppProps => {
     )
 }
 
+const Root = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100vw;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+`
+
+const Container = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  @media(max-width: 700px) {
+    flex-direction: column;
+  }
+`
+
+const Item = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column-reverse;
+  margin: 0 10px;
+  
+  label {
+    margin: -2em auto auto;
+    height: 26px;
+    box-sizing: border-box;
+    font-size: 1.25em;
+    background: white;
+    padding: 5px;
+    opacity: 0;
+    transition: .1s;
+    z-index: -1;
+  }
+  &:not(:focus-within) {
+    margin-bottom: 13px;
+    transition: .1s;
+  }
+  
+  &:focus-within label {
+    z-index: 2;
+    margin: -13px auto auto;
+    opacity: 1;
+    font-size: 1em;
+  }
+  
+  input:focus::placeholder {
+    color: transparent;
+  }
+  
+  input {
+    padding: 20px;
+    font-size: 1.25em;
+    text-align: center;
+    border-radius: 10px;
+    border: 1px solid #999;
+  }
+  
+  // simplify on mobile
+  @media(max-width: 700px) {
+    align-self: stretch;
+    label {
+      display: none;
+    }
+    &:not(:focus-within) {
+      margin-bottom: 0;
+    }
+  }
+`
+const ErrorMessage = styled.p`
+  color: #FF5353;
+  font-family: sans-serif;
+`
+
+const Button = styled.input`
+  padding: 15px;
+  cursor: pointer;
+  width: 100%;
+  background: #27BA66;
+  border: none !important;
+`
 const Page: React.FC = () => {
     const dispatch = useDispatch()
     const {total, quantity, price} = useForms()
@@ -34,7 +125,7 @@ const Page: React.FC = () => {
         request.onreadystatechange = () => {
             if (request.readyState === 4) {
                 if (request.status === 200 || request.status === 201) {
-                    const jsonData = JSON.parse(request.response)
+                    JSON.parse(request.response)
                     setError(null)
                 } else {
                     const {error} = JSON.parse(request.response)
@@ -49,34 +140,48 @@ const Page: React.FC = () => {
     }, [setError, total, quantity, price])
 
     return (
-        <>
-            {error && <p style={{textAlign: 'center'}}>
+        <Root>
+            <GlobalStyle/>
+            <h1>
+                Store your value
+            </h1>
+            {error && <ErrorMessage style={{textAlign: 'center'}}>
                 {error}
-            </p>}
+            </ErrorMessage>}
             <form>
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <label>Цена</label>
-                    <input placeholder='Цена' type='number' onChange={e => {
-                        dispatch(setPriceAction(Number(e.target.value)))
-                    }} value={price || ''}/>
-                    <label>Количество</label>
-                    <input
-                        placeholder='Количество' type='number'
-                        onChange={e => {
-                            dispatch(setQuantityAction(Number(e.target.value)))
-                        }}
-                        value={quantity || ''}/>
-                    <label>Сумма</label>
-                    <input placeholder='Сумма' type='number'
-                           onChange={e => {
-                               dispatch(setTotalAction(Number(e.target.value)))
-                           }}
-                           value={total || ''}/>
-                    <input type="submit" value="Submit"
-                           onClick={onClick}/>
-                </div>
+                <Container>
+                    <Item>
+                        <label>Price</label>
+                        <input placeholder='Price' type='number' onChange={e => {
+                            dispatch(setPriceAction(Number(e.target.value)))
+                        }} value={price || ''}/>
+                    </Item>
+                    <Item><h2>x</h2></Item>
+                    <Item>
+                        <label>Quantity</label>
+                        <input
+                            placeholder='Quantity' type='number'
+                            onChange={e => {
+                                dispatch(setQuantityAction(Number(e.target.value)))
+                            }}
+                            value={quantity || ''}/>
+                    </Item>
+                    <Item><h2>=</h2></Item>
+                    <Item>
+                        <label>Total</label>
+                        <input placeholder='Total' type='number'
+                               onChange={e => {
+                                   dispatch(setTotalAction(Number(e.target.value)))
+                               }}
+                               value={total || ''}/>
+                    </Item>
+                    <Item>
+                        <Button type='button' value='save' onClick={onClick}/>
+                    </Item>
+                </Container>
+
             </form>
-        </>
+        </Root>
     )
 }
 export default Page
