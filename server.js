@@ -10,6 +10,12 @@ const { writeFile, readFile } = fs.promises
 
 const PORT = process.env.PORT || 3000
 
+// run only once, its fine to use sync version
+// dir for temp data
+if (!fs.existsSync(path.join(__dirname, process.env.STORAGE))){
+  fs.mkdirSync(path.join(__dirname, process.env.STORAGE));
+}
+
 const app = next({ dev : process.env.NODE_ENV !== 'production' })
 const nextHandler = app.getRequestHandler()
 
