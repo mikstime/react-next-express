@@ -57,6 +57,7 @@ app.prepare()
       const [ , err1 ] = await handle(writeFile(p, JSON.stringify(parsed)))
       // @TODO: Should check if collision occurred and try saving with different name
       if ( err1 ) {
+        console.log(err1)
         res.status(500).json({ error : 'Error saving result' })
         return
       }

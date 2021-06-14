@@ -1,9 +1,9 @@
 import React, {useCallback, useState} from 'react'
 import {shallowEqual, useDispatch, useSelector} from 'react-redux'
+import {MarketStateType} from '../redux/reducers/marketReducer'
 import {
     setQuantityAction, setPriceAction, setTotalAction
 } from '../redux/actions/marketActions'
-import {MarketStateType} from '../redux/reducers/marketReducer'
 import styled, {createGlobalStyle} from 'styled-components'
 
 const GlobalStyle = createGlobalStyle`

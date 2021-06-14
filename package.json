@@ -5,10 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon --exec babel-node server.js",
-    "build:server": "tsc --project tsconfig.server.json server.js",
-    "build:next": "next build",
-    "build": "npm run build:next && npm run build:server",
-    "start": "NODE_ENV=production node dist/index.js"
+    "build": "next build",
+    "start": "NODE_ENV=production nodemon --exec babel-node server.js"
   },
   "dependencies": {
     "@types/styled-components": "^5.1.10",
