@@ -61,7 +61,7 @@ app.prepare()
         return
       }
       // Store file name in cookie
-      await res.cookie('fileId', fileId, {
+      await res.status(201).cookie('fileId', fileId, {
         maxAge : 900000, httpOnly : true
       }).json(parsed)
     })
