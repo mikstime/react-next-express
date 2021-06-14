@@ -8,6 +8,7 @@ import styled, {createGlobalStyle} from 'styled-components'
 
 const GlobalStyle = createGlobalStyle`
   body {
+    background: #DFDFDF;
     margin: 0;
     font-family: sans-serif;
   }
@@ -63,6 +64,7 @@ const Item = styled.div`
     opacity: 0;
     transition: .1s;
     z-index: -1;
+    border-radius: 5px;
   }
   &:not(:focus-within) {
     margin-bottom: 13px;
