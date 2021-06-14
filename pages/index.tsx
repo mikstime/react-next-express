@@ -5,6 +5,7 @@ import {
 import Page from '../components/page'
 import {initializeStore} from '../redux/store'
 import {NextPageContext} from 'next'
+import { ServerStyleSheet } from 'styled-components'
 
 interface StatelessPage<P = {}> extends React.FC<P> {
     getInitialProps?: (ctx: any) => Promise<P>
@@ -28,6 +29,15 @@ FormsApp.getInitialProps = async ({req}: NextPageContext) => {
         store.dispatch(setTotalAction(total))
     }
 
+    const sheet = new ServerStyleSheet()
+    // prevent screen from blinking during page load
+    try {
+        sheet.collectStyles(<FormsApp/>)
+    } catch (error) {
+        // nop
+    } finally {
+        sheet.seal()
+    }
     return {initialReduxState: store.getState()}
 }
 
