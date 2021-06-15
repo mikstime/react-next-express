@@ -1,51 +1,38 @@
 import React, {useCallback, useState} from 'react'
-import {shallowEqual, useDispatch, useSelector} from 'react-redux'
+import {connect} from 'react-redux'
 import {MarketStateType} from '../redux/reducers/marketReducer'
 import {
-    setQuantityAction, setPriceAction, setTotalAction
+    setQuantityAction, setPriceAction, setTotalAction, MarketAction
 } from '../redux/actions/marketActions'
+import {bindActionCreators} from 'redux'
 
 type AppProps = Omit<MarketStateType, 'order'>
 
-const useForms = (): AppProps => {
-    return useSelector(
-        (state: { market: MarketStateType }) => {
-            return {
-                total: state.market.total,
-                quantity: state.market.quantity,
-                price: state.market.price
-            }
-        },
-        shallowEqual
-    )
-}
 
-const Page: React.FC = () => {
-    const dispatch = useDispatch()
-    const {total, quantity, price} = useForms()
+const Page: React.FC<AppProps & MarketAction> = (
+    {total, quantity, price, setQuantityAction, setPriceAction, setTotalAction}
+) => {
     const [error, setError] = useState<null | string>(null)
 
-    const onClick = useCallback((e) => {
+    const onClick = useCallback(async (e) => {
         e.preventDefault()
-
-        const request = new XMLHttpRequest()
-        request.open('POST', '/api/store', true)
-        request.setRequestHeader('Content-Type', 'application/json')
-        request.onreadystatechange = () => {
-            if (request.readyState === 4) {
-                if (request.status === 200 || request.status === 201) {
-                    JSON.parse(request.response)
-                    setError(null)
-                } else {
-                    const {error} = JSON.parse(request.response)
-                    setError(error)
-                }
+        const res = await fetch('/api/store', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({quantity, price, total})
+        })
+        if (res.status === 200 || res.status === 201) {
+            setError(null)
+        } else {
+            try {
+                setError((await res.json()).error)
+            } catch (e) {
+                setError('Error parsing response')
             }
-
         }
-
-        request.send(JSON.stringify({quantity, price, total}))
-
     }, [setError, total, quantity, price])
 
     return (
@@ -62,25 +49,31 @@ const Page: React.FC = () => {
             </h3>}
             <label>Price</label>
             <input placeholder='Price' type='number' onChange={e => {
-                dispatch(setPriceAction(Number(e.target.value)))
+                setPriceAction(Number(e.target.value))
             }} value={price || ''}/>
             <h2>x</h2>
             <label>Quantity</label>
             <input
                 placeholder='Quantity' type='number'
                 onChange={e => {
-                    dispatch(setQuantityAction(Number(e.target.value)))
+                    setQuantityAction(Number(e.target.value))
                 }}
                 value={quantity || ''}/>
             <h2>=</h2>
             <label>Total</label>
             <input placeholder='Total' type='number'
                    onChange={e => {
-                       dispatch(setTotalAction(Number(e.target.value)))
+                       setTotalAction(Number(e.target.value))
                    }}
                    value={total || ''}/>
             <input type='button' value='save' onClick={onClick}/>
         </form>
     )
 }
-export default Page
+
+const mapStateToProps = (state: { market: MarketStateType }) => ({...state.market})
+const mapDispatchToProps = (dispatch) => bindActionCreators(
+    {setQuantityAction, setPriceAction, setTotalAction}, dispatch
+)
+
+export default connect(mapStateToProps, mapDispatchToProps)(Page)
