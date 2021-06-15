@@ -1,5 +1,5 @@
 import React from 'react'
-import Page from '../components/page'
+import Page from '../components/Page'
 import {GetServerSideProps} from 'next'
 
 const FormsApp: React.FC = () => {

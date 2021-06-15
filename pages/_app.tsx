@@ -2,6 +2,7 @@ import React from 'react'
 import {Provider} from 'react-redux'
 import {AppProps} from 'next/app'
 import {makeStore} from '../redux/store'
+import './style.css'
 
 const App = ({Component, pageProps}: AppProps) => {
     // run only once on server side and once on client side

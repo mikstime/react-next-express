@@ -36,11 +36,7 @@ const Page: React.FC<AppProps & MarketAction> = (
     }, [setError, total, quantity, price])
 
     return (
-        <form style={{
-            flexDirection: 'column',
-            display: 'flex',
-            alignItems: 'center'
-        }}>
+        <form>
             <h1>
                 Store your value
             </h1>
@@ -48,7 +44,8 @@ const Page: React.FC<AppProps & MarketAction> = (
                 {error}
             </h3>}
             <label>Price</label>
-            <input placeholder='Price' type='number' onChange={e => {
+            <input
+                placeholder='Price' type='number' onChange={e => {
                 setPriceAction(Number(e.target.value))
             }} value={price || ''}/>
             <h2>x</h2>
