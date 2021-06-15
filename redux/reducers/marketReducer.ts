@@ -72,7 +72,7 @@ const updateMarketFields = (
 const marketReducer = (state: MarketStateType = InitialState, action: MarketActionReturnType) => {
     if (action.type in MARKET_ACTIONS) {
         const newState = {...state, order: [...state.order]}
-        updateOrder(state.order, action.type)
+        updateOrder(newState.order, action.type)
         updateMarketFields(marketUpdateChains[action.type], newState, action)
         return newState
     }

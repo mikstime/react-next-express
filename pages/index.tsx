@@ -11,9 +11,9 @@ export const getServerSideProps: GetServerSideProps = async ({req}) => {
         headers: {cookie: req.headers.cookie}
     })
     const response = await res.json()
-    let store = {market: {price: 0, quantity: 0, total: 0, order: [0, 1, 2]}}
+    let store = {market: {price: 0, quantity: 0, total: 0, order: []}}
     // change store if value was found
-    if (response) store.market = {...store.market, ...response}
+    if (!response.error) store.market = {order: [0, 1, 2], ...response}
 
     return {props: {initialReduxState: store}}
 }
