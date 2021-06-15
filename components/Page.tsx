@@ -44,24 +44,20 @@ const Page: React.FC<AppProps & MarketAction> = (
                 {error}
             </h3>}
             <label>Price</label>
-            <input
-                placeholder='Price' type='number' onChange={e => {
+            <input placeholder='Price' type='number' onChange={e => {
                 setPriceAction(Number(e.target.value))
             }} value={price || ''}/>
             <h2>x</h2>
             <label>Quantity</label>
-            <input
-                placeholder='Quantity' type='number'
-                onChange={e => {
-                    setQuantityAction(Number(e.target.value))
-                }}
-                value={quantity || ''}/>
+            <input placeholder='Quantity' type='number' onChange={e => {
+                setQuantityAction(Number(e.target.value))
+            }}
+                   value={quantity || ''}/>
             <h2>=</h2>
             <label>Total</label>
-            <input placeholder='Total' type='number'
-                   onChange={e => {
-                       setTotalAction(Number(e.target.value))
-                   }}
+            <input placeholder='Total' type='number' onChange={e => {
+                setTotalAction(Number(e.target.value))
+            }}
                    value={total || ''}/>
             <input type='button' value='save' onClick={onClick}/>
         </form>
