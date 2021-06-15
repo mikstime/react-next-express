@@ -1,5 +1,4 @@
 import {MARKET_ACTIONS, MarketActionReturnType} from '../actions/marketActions'
-import produce from 'immer'
 
 // Reducer with initial state
 export type MarketStateType = {
@@ -24,68 +23,38 @@ export const InitialState: MarketStateType = {
  * was [], edited 1 => [1]
  * was [1,2], edited 1 => [2,1]
  * @param order
- * @param lastAction
+ * @param action
  */
-const updateOrder = (order: MARKET_ACTIONS[], lastAction: MARKET_ACTIONS) => {
-    if (order.length === 0) return [lastAction]
-
-    if (order.length === 1) {
-        if (order[0] === lastAction) return order
-        return [...order, lastAction]
-    }
-
-    if (order.length === 2) {
-        if (order[1] === lastAction) return order
-        if (order[0] === lastAction) return order.reverse()
-        return [...order, lastAction]
-    }
-
-    if (order[2] !== lastAction) {
-        if (order[1] === lastAction) {
-            const el = order[1]
-            order[1] = order[2]
-            order[2] = el
-        } else {
-            order.push(order.shift())
-        }
-    }
-    return order
+const updateOrder = (order: MARKET_ACTIONS[], action: MARKET_ACTIONS) => {
+    const index = order.indexOf(action)
+    // works for any number of actions
+    order.push(~index ? order.splice(index, 1)[0] : action)
 }
 
-const marketReducer = produce((draft, action: MarketActionReturnType) => {
-    // If
+const updatePrice = s => s.price = s.total / s.quantity
+const updateQuantity = s => s.quantity = s.total / s.price
+const updateTotal = s => s.total = s.price * s.quantity
+
+const marketUpdateChains = {
+    [MARKET_ACTIONS.SET_PRICE]: ['price', MARKET_ACTIONS.SET_TOTAL, updateTotal, updateQuantity],
+    [MARKET_ACTIONS.SET_QUANTITY]: ['quantity', MARKET_ACTIONS.SET_PRICE, updatePrice, updateTotal],
+    [MARKET_ACTIONS.SET_TOTAL]: ['total', MARKET_ACTIONS.SET_PRICE, updatePrice, updateQuantity]
+}
+
+const updateMarketFields = (chain: any, state: MarketStateType, action: MarketActionReturnType) => {
+    state[chain[0]] = action.amount
+    if (state.order.length < 3) return
+    const index = state.order[0] === chain[1] ? 2 : 3 // update fields conditionally
+    chain[index](state)
+}
+const marketReducer = (state: MarketStateType = InitialState, action: MarketActionReturnType) => {
     if (action.type in MARKET_ACTIONS) {
-        draft.order = updateOrder(draft.order, action.type)
-        switch (action.type) {
-            case MARKET_ACTIONS.SET_PRICE:
-                draft.price = action.amount
-                if (draft.order.length < 3) return
-                if (draft.order[0] === MARKET_ACTIONS.SET_TOTAL) {
-                    draft.total = draft.price * draft.quantity
-                } else if (draft.order[0] === MARKET_ACTIONS.SET_QUANTITY) {
-                    draft.quantity = draft.total / draft.price
-                }
-                break
-            case MARKET_ACTIONS.SET_QUANTITY:
-                draft.quantity = action.amount
-                if (draft.order.length < 3) return
-                if (draft.order[0] === MARKET_ACTIONS.SET_PRICE) {
-                    draft.price = draft.total / draft.quantity
-                } else if (draft.order[0] === MARKET_ACTIONS.SET_TOTAL) {
-                    draft.total = draft.quantity * draft.price
-                }
-                break
-            case MARKET_ACTIONS.SET_TOTAL:
-                draft.total = action.amount
-                if (draft.order.length < 3) return
-                if (draft.order[0] === MARKET_ACTIONS.SET_PRICE) {
-                    draft.price = draft.total / draft.quantity
-                } else if (draft.order[0] === MARKET_ACTIONS.SET_QUANTITY) {
-                    draft.quantity = draft.total / draft.price
-                }
-                break
-        }
+        const newState = {...state, order: [...state.order]}
+        updateOrder(state.order, action.type)
+        updateMarketFields(marketUpdateChains[action.type], newState, action)
+        return newState
     }
-}, InitialState)
+    return state
+}
 
 export default marketReducer
