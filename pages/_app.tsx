@@ -1,10 +1,11 @@
 import React from 'react'
 import {Provider} from 'react-redux'
-import {useStore} from '../redux/store'
 import {AppProps} from 'next/app'
+import {makeStore} from '../redux/store'
 
 const App = ({Component, pageProps}: AppProps) => {
-    const store = useStore(pageProps.initialReduxState)
+    // run only once on server side and once on client side
+    const store = makeStore(pageProps.initialReduxState)
     return (
         <Provider store={store}>
             <Component {...pageProps} />
