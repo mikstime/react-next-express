@@ -1,19 +1,23 @@
-import React, {useCallback, useState} from 'react'
+import React, {useCallback} from 'react'
 import {connect} from 'react-redux'
 import {MarketStateType} from '../redux/reducers/marketReducer'
 import {
     setQuantityAction, setPriceAction, setTotalAction, MarketAction
 } from '../redux/actions/marketActions'
 import {bindActionCreators} from 'redux'
+import {ErrorAction, setErrorAction} from '../redux/actions/errorActions'
+import {ErrorStateType} from '../redux/reducers/errorReducer'
 
 type AppProps = Omit<MarketStateType, 'order'>
+    & MarketAction & ErrorAction & ErrorStateType
 
 
-const Page: React.FC<AppProps & MarketAction> = (
-    {total, quantity, price, setQuantityAction, setPriceAction, setTotalAction}
+const Page: React.FC<AppProps> = (
+    {
+        total, quantity, price, setQuantityAction, setPriceAction,
+        setTotalAction, error, setErrorAction
+    }
 ) => {
-    const [error, setError] = useState<null | string>(null)
-
     const onClick = useCallback(async (e) => {
         e.preventDefault()
         const res = await fetch('/api/store', {
@@ -25,15 +29,15 @@ const Page: React.FC<AppProps & MarketAction> = (
             body: JSON.stringify({quantity, price, total})
         })
         if (res.status === 200 || res.status === 201) {
-            setError(null)
+            setErrorAction(null)
         } else {
             try {
-                setError((await res.json()).error)
+                setErrorAction((await res.json()).error)
             } catch (e) {
-                setError('Error parsing response')
+                setErrorAction('Error parsing response')
             }
         }
-    }, [setError, total, quantity, price])
+    }, [setErrorAction, total, quantity, price])
 
     return (
         <form>
@@ -64,9 +68,17 @@ const Page: React.FC<AppProps & MarketAction> = (
     )
 }
 
-const mapStateToProps = (state: { market: MarketStateType }) => ({...state.market})
+const mapStateToProps = (
+    state: { market: MarketStateType, error: ErrorStateType }
+) => ({...state.market, ...state.error})
+
 const mapDispatchToProps = (dispatch) => bindActionCreators(
-    {setQuantityAction, setPriceAction, setTotalAction}, dispatch
+    {
+        setQuantityAction,
+        setPriceAction,
+        setTotalAction,
+        setErrorAction
+    }, dispatch
 )
 
 export default connect(mapStateToProps, mapDispatchToProps)(Page)
