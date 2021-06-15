@@ -1,9 +1,5 @@
 import React from 'react'
-import {
-    setPriceAction, setQuantityAction, setTotalAction
-} from '../redux/actions/marketActions'
 import Page from '../components/page'
-import {initializeStore} from '../redux/store'
 import {NextPageContext} from 'next'
 import { ServerStyleSheet } from 'styled-components'
 
@@ -20,13 +16,12 @@ FormsApp.getInitialProps = async ({req}: NextPageContext) => {
         headers: req ? {cookie: req.headers.cookie} : undefined
     })
 
-    const store = initializeStore()
+    let store = {market: {price: 0, quantity: 0, total: 0, order: [0, 1, 2]}}
+
     const response = await res.json()
     if (response) {
         const {quantity, total, price} = response
-        store.dispatch(setPriceAction(price))
-        store.dispatch(setQuantityAction(quantity))
-        store.dispatch(setTotalAction(total))
+        store.market = {...store.market, quantity, total, price}
     }
 
     const sheet = new ServerStyleSheet()
@@ -38,7 +33,7 @@ FormsApp.getInitialProps = async ({req}: NextPageContext) => {
     } finally {
         sheet.seal()
     }
-    return {initialReduxState: store.getState()}
+    return {initialReduxState: store}
 }
 
 export default FormsApp
