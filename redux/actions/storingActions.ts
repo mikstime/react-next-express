@@ -24,27 +24,29 @@ export const storeResults = () => {
         const {quantity, price, total} = getState().market
 
         dispatch(startLoadingAction)
-
-        const res = await fetch('/api/store', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({quantity, price, total})
-        })
-
-        if (res.status === 200 || res.status === 201) {
-            dispatch(finishLoadingAction())
-        } else {
+        try {
+            const res = await fetch('/api/store', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({quantity, price, total})
+            })
             try {
-                const {error} = await res.json()
-                dispatch(setErrorAction(error))
+                if (res.status === 200 || res.status === 201) {
+                    dispatch(finishLoadingAction())
+                } else {
+                    const {error} = await res.json()
+                    dispatch(setErrorAction(error))
+                }
             } catch (e) {
                 dispatch(setErrorAction('Error parsing response'))
             }
+        } catch (e) {
+            dispatch(setErrorAction('Could not store a result'))
         }
-    };
+    }
 }
 
 export type StoringActionReturnType =
@@ -52,9 +54,8 @@ export type StoringActionReturnType =
     ReturnType<typeof finishLoadingAction> |
     ReturnType<typeof setErrorAction>
 
-export type StoringAction =
-    {
-        startLoadingAction: typeof startLoadingAction
-        finishLoadingAction: typeof finishLoadingAction
-        setErrorAction: typeof setErrorAction
-    }
+export type StoringAction = {
+    startLoadingAction: typeof startLoadingAction
+    finishLoadingAction: typeof finishLoadingAction
+    setErrorAction: typeof setErrorAction
+}

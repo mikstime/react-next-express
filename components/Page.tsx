@@ -5,19 +5,19 @@ import {
     setQuantityAction, setPriceAction, setTotalAction, MarketAction
 } from '../redux/actions/marketActions'
 import {bindActionCreators} from 'redux'
-import {
-    StoringAction, storeResults
-} from '../redux/actions/storingActions'
+import {storeResults} from '../redux/actions/storingActions'
 import {StoringStateType} from '../redux/reducers/storingReducer'
 
-type AppProps = Omit<MarketStateType, 'order'>
-    & MarketAction & StoringAction & StoringStateType
+type AppProps =
+    Omit<MarketStateType, 'order'>
+    & MarketAction & StoringStateType
+    & typeof storeResults
 
 
 const Page: React.FC<AppProps> = (
     {
         total, quantity, price, setQuantityAction, setPriceAction,
-        setTotalAction, error, storeResults
+        setTotalAction, error, storeResults, state
     }
 ) => {
 
@@ -45,7 +45,8 @@ const Page: React.FC<AppProps> = (
                 setTotalAction(Number(e.target.value))
             }}
                    value={total || ''}/>
-            <input type='button' value='save' onClick={storeResults}/>
+            <input disabled={state === 'LOADING'}
+                   type='button' value='save' onClick={storeResults}/>
         </form>
     )
 }
@@ -59,7 +60,7 @@ const mapDispatchToProps = (dispatch) => bindActionCreators(
         setQuantityAction,
         setPriceAction,
         setTotalAction,
-        storeResults,
+        storeResults
     }, dispatch
 )
 
