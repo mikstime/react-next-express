@@ -15,10 +15,6 @@ export const InitialState: MarketStateType = {
     total: 0
 }
 
-type MarketUpdateChainType = [
-    string, MARKET_ACTIONS, (state: MarketStateType) => void, (state: MarketStateType) => void
-]
-
 /**
  * Renews order in which fields were edited.
  * e.g.
@@ -35,33 +31,27 @@ const updateOrder = (order: MARKET_ACTIONS[], action: MARKET_ACTIONS) => {
     order.push(~index ? order.splice(index, 1)[0] : action)
 }
 
-const updatePrice = s => s.price = s.total / s.quantity
-const updateQuantity = s => s.quantity = s.total / s.price
-const updateTotal = s => s.total = s.price * s.quantity
-/**
- * @see updateMarketFields
- */
-const marketUpdateChains: { [key: string]: MarketUpdateChainType } = {
-    [MARKET_ACTIONS.SET_PRICE]: ['price', MARKET_ACTIONS.SET_TOTAL, updateTotal, updateQuantity],
-    [MARKET_ACTIONS.SET_QUANTITY]: ['quantity', MARKET_ACTIONS.SET_PRICE, updatePrice, updateTotal],
-    [MARKET_ACTIONS.SET_TOTAL]: ['total', MARKET_ACTIONS.SET_PRICE, updatePrice, updateQuantity]
-}
-
 /**
  * updates field value and related fields based on order.
  * [0] - fieldName
  * if lastCalledAction === [1] do [2] else do [3]
- * @param chain
- * @param state
+ * @param s
  * @param action
  */
 const updateMarketFields = (
-    chain, state: MarketStateType, action: MarketActionReturnType
+    s: MarketStateType, action: MarketActionReturnType
 ) => {
-    state[chain[0]] = action.amount
-    if (state.order.length < 3) return
-    const index = state.order[0] === chain[1] ? 2 : 3 // update fields conditionally
-    chain[index](state)
+    switch (action.type) {
+        case MARKET_ACTIONS.SET_PRICE: s.price = action.amount; break;
+        case MARKET_ACTIONS.SET_QUANTITY: s.quantity = action.amount; break;
+        case MARKET_ACTIONS.SET_TOTAL: s.total = action.amount; break;
+    }
+    if (s.order.length < 3) return
+    switch (s.order[0]) {
+        case MARKET_ACTIONS.SET_PRICE: s.price = s.total / s.quantity; break;
+        case MARKET_ACTIONS.SET_QUANTITY: s.quantity = s.total / s.price; break;
+        case MARKET_ACTIONS.SET_TOTAL: s.total = s.price * s.quantity; break;
+    }
 }
 
 /**
@@ -73,7 +63,7 @@ const marketReducer = (state: MarketStateType = InitialState, action: MarketActi
     if (action.type in MARKET_ACTIONS) {
         const newState = {...state, order: [...state.order]}
         updateOrder(newState.order, action.type)
-        updateMarketFields(marketUpdateChains[action.type], newState, action)
+        updateMarketFields(newState, action)
         return newState
     }
     return state
