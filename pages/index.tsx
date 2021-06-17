@@ -1,19 +1,23 @@
 import React from 'react'
 import Page from '../components/Page'
 import {GetServerSideProps} from 'next'
+import {InitialState} from '../redux/store'
+import {MARKET_ACTIONS} from '../redux/actions/marketActions'
 
-const FormsApp: React.FC = () => {
-    return <Page/>
-}
+const FormsApp = Page
 
 export const getServerSideProps: GetServerSideProps = async ({req}) => {
     const res = await fetch(`${process.env.API}/store`, {
         headers: {cookie: req.headers.cookie}
     })
     const response = await res.json()
-    let store = {market: {price: 0, quantity: 0, total: 0, order: []}, error: {error: null}}
+    let store = InitialState
     // change store if value was found
-    if (!response.error) store.market = {order: [0, 1, 2], ...response}
+    if (!response.error) store.market = {
+        order: [
+            MARKET_ACTIONS.SET_PRICE, MARKET_ACTIONS.SET_QUANTITY, MARKET_ACTIONS.SET_TOTAL
+        ], ...response
+    }
 
     return {props: {initialReduxState: store}}
 }

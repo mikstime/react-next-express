@@ -1,10 +1,10 @@
 import marketReducer from './marketReducer'
-import errorReducer from './errorReducer'
+import storingReducer from './storingReducer'
 import {combineReducers} from 'redux'
 
 const rootReducer = combineReducers({
     market: marketReducer,
-    error: errorReducer,
+    storing: storingReducer,
 })
 
 export default rootReducer

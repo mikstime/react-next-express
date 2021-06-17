@@ -1,43 +1,25 @@
-import React, {useCallback} from 'react'
+import React from 'react'
 import {connect} from 'react-redux'
 import {MarketStateType} from '../redux/reducers/marketReducer'
 import {
     setQuantityAction, setPriceAction, setTotalAction, MarketAction
 } from '../redux/actions/marketActions'
 import {bindActionCreators} from 'redux'
-import {ErrorAction, setErrorAction} from '../redux/actions/errorActions'
-import {ErrorStateType} from '../redux/reducers/errorReducer'
+import {
+    StoringAction, storeResults
+} from '../redux/actions/storingActions'
+import {StoringStateType} from '../redux/reducers/storingReducer'
 
 type AppProps = Omit<MarketStateType, 'order'>
-    & MarketAction & ErrorAction & ErrorStateType
+    & MarketAction & StoringAction & StoringStateType
 
 
 const Page: React.FC<AppProps> = (
     {
         total, quantity, price, setQuantityAction, setPriceAction,
-        setTotalAction, error, setErrorAction
+        setTotalAction, error, storeResults
     }
 ) => {
-    const onClick = useCallback(async (e) => {
-        e.preventDefault()
-        const res = await fetch('/api/store', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({quantity, price, total})
-        })
-        if (res.status === 200 || res.status === 201) {
-            setErrorAction(null)
-        } else {
-            try {
-                setErrorAction((await res.json()).error)
-            } catch (e) {
-                setErrorAction('Error parsing response')
-            }
-        }
-    }, [setErrorAction, total, quantity, price])
 
     return (
         <form>
@@ -63,21 +45,21 @@ const Page: React.FC<AppProps> = (
                 setTotalAction(Number(e.target.value))
             }}
                    value={total || ''}/>
-            <input type='button' value='save' onClick={onClick}/>
+            <input type='button' value='save' onClick={storeResults}/>
         </form>
     )
 }
 
 const mapStateToProps = (
-    state: { market: MarketStateType, error: ErrorStateType }
-) => ({...state.market, ...state.error})
+    state: { market: MarketStateType, storing: StoringStateType }
+) => ({...state.market, ...state.storing})
 
 const mapDispatchToProps = (dispatch) => bindActionCreators(
     {
         setQuantityAction,
         setPriceAction,
         setTotalAction,
-        setErrorAction
+        storeResults,
     }, dispatch
 )
 

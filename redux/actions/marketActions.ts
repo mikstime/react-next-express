@@ -1,8 +1,8 @@
 //Action Types
 export enum MARKET_ACTIONS {
-    SET_QUANTITY,
-    SET_PRICE,
-    SET_TOTAL
+    SET_QUANTITY = 'SET_QUANTITY',
+    SET_PRICE = 'SET_PRICE',
+    SET_TOTAL = 'SET_TOTAL'
 }
 
 export const setQuantityAction = (amount: number) => ({
